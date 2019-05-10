@@ -119,41 +119,75 @@ class BasicPushEvent
         }
     }
 
+//     /**
+//      * 回复消息
+//      * @param array $data 消息内容
+//      * @param bool $return 是否返回XML内容
+//      * @return string
+//      * @throws InvalidDecryptException
+//      */
+//     public function reply(array $data = [], $return = false)
+//     {
+//         $xml = Tools::arr2xml(empty($data) ? $this->message : $data);
+//         if ($this->encryptType == 'aes') {
+// //            if (!class_exists('Prpcrypt', false)) {
+// //                require __DIR__ . '/Prpcrypt.php';
+// //            }
+// //            $prpcrypt = new \Prpcrypt($this->config->get('encodingaeskey'));
+//             // 如果是第三方平台，加密得使用 component_appid
+//             $component_appid = $this->config->get('component_appid');
+//             $appid = empty($component_appid) ? $this->appid : $component_appid;
+// //            $array = $prpcrypt->encrypt($xml, $appid);
+//             $array = $this->encode($xml, $appid);
+//             if ($array[0] > 0) {
+//                 throw new InvalidDecryptException('Encrypt Error.', '0');
+//             }
+// //            list($timestamp, $encrypt) = [time(), $array[1]];
+// //            $nonce = rand(77, 999) * rand(605, 888) * rand(11, 99);
+// //            $tmpArr = [$this->config->get('token'), $timestamp, $nonce, $encrypt];
+// //            sort($tmpArr, SORT_STRING);
+// //            $signature = sha1(implode($tmpArr));
+// //            $format = "<xml><Encrypt><![CDATA[%s]]></Encrypt><MsgSignature><![CDATA[%s]]></MsgSignature><TimeStamp>%s</TimeStamp><Nonce><![CDATA[%s]]></Nonce></xml>";
+// //            $xml = sprintf($format, $encrypt, $signature, $timestamp, $nonce);
+//             $xml = $array[1];
+//         }
+//         if ($return) {
+//             return $xml;
+//         }
+//         @ob_clean();
+//         echo $xml;
+//     }
+
     /**
      * 回复消息
      * @param array $data 消息内容
-     * @param bool $return 是否返回XML内容
+     * @param boolean $return 是否返回XML内容
+     * @param boolean $isEncrypt 是否加密内容
      * @return string
      * @throws InvalidDecryptException
      */
-    public function reply(array $data = [], $return = false)
+    public function reply(array $data = [], $return = false, $isEncrypt = false)
     {
         $xml = Tools::arr2xml(empty($data) ? $this->message : $data);
-        if ($this->encryptType == 'aes') {
-//            if (!class_exists('Prpcrypt', false)) {
-//                require __DIR__ . '/Prpcrypt.php';
-//            }
-//            $prpcrypt = new \Prpcrypt($this->config->get('encodingaeskey'));
+        if ($this->isEncrypt() || $isEncrypt) {
+            if (!class_exists('Prpcrypt', false)) {
+                require __DIR__ . '/Prpcrypt.php';
+            }
+            $prpcrypt = new \Prpcrypt($this->config->get('encodingaeskey'));
             // 如果是第三方平台，加密得使用 component_appid
             $component_appid = $this->config->get('component_appid');
             $appid = empty($component_appid) ? $this->appid : $component_appid;
-//            $array = $prpcrypt->encrypt($xml, $appid);
-            $array = $this->encode($xml, $appid);
-            if ($array[0] > 0) {
-                throw new InvalidDecryptException('Encrypt Error.', '0');
-            }
-//            list($timestamp, $encrypt) = [time(), $array[1]];
-//            $nonce = rand(77, 999) * rand(605, 888) * rand(11, 99);
-//            $tmpArr = [$this->config->get('token'), $timestamp, $nonce, $encrypt];
-//            sort($tmpArr, SORT_STRING);
-//            $signature = sha1(implode($tmpArr));
-//            $format = "<xml><Encrypt><![CDATA[%s]]></Encrypt><MsgSignature><![CDATA[%s]]></MsgSignature><TimeStamp>%s</TimeStamp><Nonce><![CDATA[%s]]></Nonce></xml>";
-//            $xml = sprintf($format, $encrypt, $signature, $timestamp, $nonce);
-            $xml = $array[1];
+            $array = $prpcrypt->encrypt($xml, $appid);
+            if ($array[0] > 0) throw new InvalidDecryptException('Encrypt Error.', '0');
+            list($timestamp, $encrypt) = [time(), $array[1]];
+            $nonce = rand(77, 999) * rand(605, 888) * rand(11, 99);
+            $tmpArr = [$this->config->get('token'), $timestamp, $nonce, $encrypt];
+            sort($tmpArr, SORT_STRING);
+            $signature = sha1(implode($tmpArr));
+            $format = "<xml><Encrypt><![CDATA[%s]]></Encrypt><MsgSignature><![CDATA[%s]]></MsgSignature><TimeStamp>%s</TimeStamp><Nonce><![CDATA[%s]]></Nonce></xml>";
+            $xml = sprintf($format, $encrypt, $signature, $timestamp, $nonce);
         }
-        if ($return) {
-            return $xml;
-        }
+        if ($return) return $xml;
         @ob_clean();
         echo $xml;
     }
