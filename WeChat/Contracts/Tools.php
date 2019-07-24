@@ -302,14 +302,14 @@ class Tools
     public static function setCache($name, $value = '', $expired = 3600)
     {
         $content = serialize(['name' => $name, 'value' => $value, 'expired' => time() + intval($expired)]);
-        if(strpos($name, '_access_token') === false) {
+        /*if(strpos($name, '_access_token') === false) {*/
             $file = self::getCacheName($name);
             if (!file_put_contents($file, $content)) throw new LocalCacheException('local cache error.', '0');
-            return $file;
-        } else {
+//            return $file;
+        /*} else {*/
             redis()->setex($name, 7000, $content);
             return $name;
-        }
+        /*}*/
     }
 
     /**
@@ -319,7 +319,7 @@ class Tools
      */
     public static function getCache($name)
     {
-        if(strpos($name, '_access_token') === false) {
+        /*if(strpos($name, '_access_token') === false) {
             $file = self::getCacheName($name);
             if (file_exists($file) && ($content = file_get_contents($file))) {
                 $data = unserialize($content);
@@ -328,8 +328,8 @@ class Tools
                 }
                 self::delCache($name);
             }
-            return null;
-        } else {
+             return null;
+        } else {*/
             $content = redis()->get($name);
             if(!empty($content)) {
                 $data = unserialize($content);
@@ -339,7 +339,7 @@ class Tools
                 self::delCache($name);
             }
             return null;
-        }
+        /*}*/
     }
 
     /**
@@ -349,10 +349,10 @@ class Tools
      */
     public static function delCache($name)
     {
-        if(strpos($name, '_access_token') === false) {
+        /*if(strpos($name, '_access_token') === false) {*/
             $file = self::getCacheName($name);
-            return file_exists($file) ? unlink($file) : true;
-        }
+            /*return file_exists($file) ? unlink($file) : true;
+        }*/
         return redis()->exists($name) ? redis()->del($name) : true;
     }
 
