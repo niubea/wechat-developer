@@ -15,6 +15,7 @@
 namespace WeChat;
 
 use WeChat\Contracts\BasicWeChat;
+use WeChat\Contracts\Tools;
 
 /**
  * 二维码管理
@@ -43,6 +44,15 @@ class Qrcode extends BasicWeChat
             $data['expire_seconds'] = $expire_seconds;
             $data['action_name'] = is_integer($scene) ? 'QR_SCENE' : 'QR_STR_SCENE';
         } else { // 永久二维码
+            //记录生成的永久二维码个数
+            $key = 'qrcode_number';
+            $qr_num = Tools::getCache($key);
+            if(!$qr_num) {
+                $qr_num = 100;
+            }
+            $qr_num += 1;
+            Tools::setCache($key, $qr_num);
+
             $data['action_name'] = is_integer($scene) ? 'QR_LIMIT_SCENE' : 'QR_LIMIT_STR_SCENE';
         }
         $url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=ACCESS_TOKEN";
