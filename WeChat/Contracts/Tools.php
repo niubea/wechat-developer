@@ -307,7 +307,11 @@ class Tools
             if (!file_put_contents($file, $content)) throw new LocalCacheException('local cache error.', '0');
 //            return $file;
         /*} else {*/
-            redis()->setex($name, 7000, $content);
+        if($expired == 0) {
+            redis()->set($name, $content);
+        } else {
+            redis()->setex($name, $expired, $content);
+        }
             return $name;
         /*}*/
     }

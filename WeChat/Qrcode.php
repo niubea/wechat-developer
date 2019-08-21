@@ -51,7 +51,7 @@ class Qrcode extends BasicWeChat
                 $qr_num = 100;
             }
             $qr_num += 1;
-            Tools::setCache($key, $qr_num);
+            Tools::setCache($key, $qr_num, 0);
 
             $data['action_name'] = is_integer($scene) ? 'QR_LIMIT_SCENE' : 'QR_LIMIT_STR_SCENE';
         }
